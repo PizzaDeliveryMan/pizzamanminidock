@@ -9,6 +9,8 @@ services:
       - ./databases:/var/www/databases
       - ./.phpredisadmin:/var/www/phpredisadmin
       - ./../projects/:/var/www/projects
+    #environment:
+    #  - NODE_VERSION=root
     tty: true
     dns: 8.8.8.8
 
@@ -24,6 +26,24 @@ services:
     dns: 8.8.8.8
     ports:
       - "9912:9912"
+
+#  php:
+#      build: ./docker/php73special
+#      container_name: koel_php
+#    links:
+#      - db
+#      - workspace
+#      - redis
+#    volumes_from:
+#      - workspace
+#    depends_on:
+#        - db
+#    env_file: .env
+#    ports:
+#        - '8000:80'
+#    volumes:
+#        - '~/Music:/home/koel/media'
+#        - '.env:/var/www/html/.env'
 
   web:
     container_name: dockerhero_web
