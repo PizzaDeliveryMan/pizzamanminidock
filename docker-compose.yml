@@ -7,24 +7,20 @@ services:
     volumes:
       - ./crons:/var/crons
       - ./databases:/var/www/databases
-      - ./.phpmyadmin:/var/www/phpmyadmin
       - ./.phpredisadmin:/var/www/phpredisadmin
-      - ./../:/var/www/projects
-      - /etc/localtime:/etc/localtime:ro
+      - ./../projects/:/var/www/projects
     tty: true
     dns: 8.8.8.8
 
   php:
     container_name: dockerhero_php
-    image: johanvanhelden/dockerhero-php-7.1-fpm:latest
+    image: johanvanhelden/dockerhero-php-7.3-fpm:latest
     links:
       - db
       - workspace
       - redis
     volumes_from:
       - workspace
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
     dns: 8.8.8.8
     ports:
       - "9912:9912"
@@ -37,7 +33,6 @@ services:
     volumes:
       - ./nginx/conf:/etc/nginx/conf.d/dockerhero/custom
       - nginx_logs:/var/log/nginx
-      - /etc/localtime:/etc/localtime:ro
     volumes_from:
       - php
       - workspace
@@ -48,25 +43,16 @@ services:
 
   db:
     container_name: dockerhero_db
-    image: mysql:5.7
+    image: mysql:5.6
     command: --sql_mode="NO_ENGINE_SUBSTITUTION"
     volumes:
       - "database:/var/lib/mysql"
-      - /etc/localtime:/etc/localtime:ro
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: dockerhero
-      MYSQL_DATABASE: dockerhero
-      MYSQL_USER: dockerhero
-      MYSQL_PASSWORD: dockerhero
-    dns: 8.8.8.8
-
-  mail:
-    container_name: dockerhero_mail
-    image: mailhog/mailhog
-    ports:
-      - "1025:1025"
-      - "8025:8025"
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: koel
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
     dns: 8.8.8.8
 
   redis:
@@ -77,6 +63,23 @@ services:
     ports:
       - "6379:6379"
     command: redis-server --appendonly yes
+
+
+### phpMyAdmin ###########################################
+  phpmyadmin:
+    container_name: dockerhero_myadmin
+    build: ./docker/phpmyadmin
+    environment:
+      - PMA_ARBITRARY=1
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=root
+      - MYSQL_ROOT_PASSWORD=root
+    ports:
+      - "8080:80"
+    depends_on:
+      - "db"
+    volumes:
+      - ./docker/phpmyadmin/themes/metro/:/var/www/html/themes/metro/
 
 volumes:
   database:
